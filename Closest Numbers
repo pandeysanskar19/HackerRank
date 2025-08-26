@@ -1,0 +1,48 @@
+/* Smallest difference */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+static int compare (const void *a, const void *b)
+{
+  return *((int *) a) - *((int *) b);
+}
+
+int main (void)
+{
+  int n, *arr, i, min_diff = INT_MAX, min_ind[1024], curr_diff, count = 0;
+  
+  scanf (" %d", &n);
+  arr = malloc (sizeof (int) * n);
+  
+  for (i=0; i<n; i++)
+  {
+	scanf (" %d", &arr[i]);
+  }
+  
+  qsort (arr, n, sizeof (int), compare);
+  
+  for (i=0; i<n-1; i++)
+  {
+	curr_diff = abs (arr[i+1] - arr[i]);
+	if (curr_diff < min_diff)
+	{
+	  min_diff = curr_diff;
+	  count = 0;
+	  min_ind[count++] = i;
+	}
+	else if (curr_diff == min_diff)
+	{
+	  min_ind[count++] = i;
+	}
+  }
+  
+  for (i=0; i<count; i++)
+  {
+	printf ("%d %d ", arr[min_ind[i]], arr[min_ind[i]+1]); 
+  }
+  
+  free (arr);
+  return 0;
+}
