@@ -1,0 +1,189 @@
+#include <assert.h>
+#include <ctype.h>
+#include <limits.h>
+#include <math.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+char* readline();
+char* ltrim(char*);
+char* rtrim(char*);
+char** split_string(char*);
+int parse_int(char*);
+
+char* organizingContainers(int container_rows, int container_columns, int** container);
+
+/* Comparator for qsort */
+int cmp_ll(const void *pa, const void *pb) {
+    long long a = *(const long long*)pa;
+    long long b = *(const long long*)pb;
+    if (a < b) return -1;
+    if (a > b) return 1;
+    return 0;
+}
+
+char* organizingContainers(int container_rows, int container_columns, int** container) {
+    long long *containerSum = malloc(container_rows * sizeof(long long));
+    long long *typeSum = malloc(container_columns * sizeof(long long));
+    if (!containerSum || !typeSum) {
+        static char memfail[] = "Impossible";
+        free(containerSum);
+        free(typeSum);
+        return memfail;
+    }
+
+    for (int i = 0; i < container_rows; i++) containerSum[i] = 0;
+    for (int j = 0; j < container_columns; j++) typeSum[j] = 0;
+
+    /* Compute sums */
+    for (int i = 0; i < container_rows; i++) {
+        for (int j = 0; j < container_columns; j++) {
+            containerSum[i] += container[i][j];  // total balls in container i
+            typeSum[j] += container[i][j];       // total balls of type j
+        }
+    }
+
+    /* Sort both arrays */
+    qsort(containerSum, container_rows, sizeof(long long), cmp_ll);
+    qsort(typeSum, container_columns, sizeof(long long), cmp_ll);
+
+    /* Compare */
+    for (int i = 0; i < container_rows; i++) {
+        if (containerSum[i] != typeSum[i]) {
+            free(containerSum);
+            free(typeSum);
+            static char impossible[] = "Impossible";
+            return impossible;
+        }
+    }
+
+    free(containerSum);
+    free(typeSum);
+    static char possible[] = "Possible";
+    return possible;
+}
+
+int main()
+{
+    char *out_path = getenv("OUTPUT_PATH");
+    FILE* fptr = out_path ? fopen(out_path, "w") : stdout;
+    if (!fptr) fptr = stdout;
+
+    int q = parse_int(ltrim(rtrim(readline())));
+
+    for (int q_itr = 0; q_itr < q; q_itr++) {
+        int n = parse_int(ltrim(rtrim(readline())));
+
+        int** container = malloc(n * sizeof(int*));
+        if (!container) exit(EXIT_FAILURE);
+
+        for (int i = 0; i < n; i++) {
+            container[i] = malloc(n * sizeof(int));
+            if (!container[i]) exit(EXIT_FAILURE);
+
+            char** container_item_temp = split_string(rtrim(readline()));
+
+            for (int j = 0; j < n; j++) {
+                int container_item = parse_int(*(container_item_temp + j));
+                container[i][j] = container_item;
+            }
+        }
+
+        char* result = organizingContainers(n, n, container);
+        fprintf(fptr, "%s\n", result);
+
+        for (int i = 0; i < n; i++) free(container[i]);
+        free(container);
+    }
+
+    if (out_path) fclose(fptr);
+    return 0;
+}
+
+char* readline() {
+    size_t alloc_length = 1024;
+    size_t data_length = 0;
+
+    char* data = malloc(alloc_length);
+    if (!data) return NULL;
+
+    while (1) {
+        char* cursor = data + data_length;
+        if (fgets(cursor, (int)(alloc_length - data_length), stdin) == NULL) break;
+
+        data_length += strlen(cursor);
+
+        if (data_length > 0 && data[data_length - 1] == '\n') break;
+
+        if (alloc_length - data_length <= 1) {
+            alloc_length <<= 1;
+            char* tmp = realloc(data, alloc_length);
+            if (!tmp) { free(data); return NULL; }
+            data = tmp;
+        }
+    }
+
+    if (data_length == 0) {
+        data[0] = '\0';
+        return data;
+    }
+
+    if (data[data_length - 1] == '\n') {
+        data[data_length - 1] = '\0';
+        char* tmp = realloc(data, data_length);
+        if (tmp) data = tmp;
+    } else {
+        char* tmp = realloc(data, data_length + 1);
+        if (tmp) data = tmp;
+        data[data_length] = '\0';
+    }
+
+    return data;
+}
+
+char* ltrim(char* str) {
+    if (!str) return NULL;
+    while (*str != '\0' && isspace((unsigned char)*str)) str++;
+    return str;
+}
+
+char* rtrim(char* str) {
+    if (!str) return NULL;
+    size_t len = strlen(str);
+    if (len == 0) return str;
+    char* end = str + len - 1;
+    while (end >= str && isspace((unsigned char)*end)) end--;
+    *(end + 1) = '\0';
+    return str;
+}
+
+char** split_string(char* str) {
+    char** splits = NULL;
+    char* token = strtok(str, " ");
+    int spaces = 0;
+
+    while (token) {
+        char** tmp = realloc(splits, sizeof(char*) * (spaces + 1));
+        if (!tmp) {
+            free(splits);
+            return NULL;
+        }
+        splits = tmp;
+        splits[spaces++] = token;
+        token = strtok(NULL, " ");
+    }
+
+    return splits;
+}
+
+int parse_int(char* str) {
+    char* endptr;
+    long val = strtol(str, &endptr, 10);
+    if (endptr == str || *endptr != '\0') exit(EXIT_FAILURE);
+    return (int)val;
+}
+
