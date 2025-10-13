@@ -1,0 +1,30 @@
+#c
+
+
+int* stones(int n, int a, int b, int* result_count) {
+    int size = n;
+    int* results = malloc(size * sizeof(int));
+    *result_count = 0;
+
+    // If a and b are equal, only one possible outcome
+    if (a == b) {
+        results[0] = (n - 1) * a;
+        *result_count = 1;
+        return results;
+    }
+ 
+    // Ensure a is smaller than b
+    if (a > b) {
+        int temp = a;
+        a = b;
+        b = temp;
+    }
+
+    // Generate all unique final stone values
+    for (int i = 0; i < n; i++) {
+        results[i] = i * b + (n - 1 - i) * a;
+    }
+
+    *result_count = n;
+    return results;
+}
