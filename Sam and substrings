@@ -1,0 +1,19 @@
+#c
+
+
+int substrings(char* n) {
+    int len = strlen(n);
+    long long total = 0;
+    long long multiplier = 1;
+    long long prev = 0;
+
+    for (int i = len - 1; i >= 0; i--) {
+        int digit = n[i] - '0';
+        long long current = (digit * multiplier + prev) % MOD;
+        total = (total + current) % MOD;
+        prev = current;
+        multiplier = (multiplier * 10 + 1) % MOD;
+    }
+
+    return (int)total;
+}
