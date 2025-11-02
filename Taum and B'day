@@ -1,0 +1,14 @@
+#C
+
+long taumBday(int b, int w, int bc, int wc, int z) {
+    long long B = b;
+    long long W = w;
+    long long BC = bc;
+    long long WC = wc;
+    long long Z = z;
+
+    long long cost_black = (BC < WC + Z) ? BC : (WC + Z);
+    long long cost_white = (WC < BC + Z) ? WC : (BC + Z);
+
+    return (B * cost_black) + (W * cost_white);
+}
