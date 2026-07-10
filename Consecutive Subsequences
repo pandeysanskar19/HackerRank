@@ -1,0 +1,35 @@
+#include <cmath>
+#include <cstdio>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+
+int main() {
+    /* Enter your code here. Read input from STDIN. Print output to STDOUT */ 
+    int T;
+    cin>>T;
+    
+    while(T--){
+        int n,k;
+        cin>>n>>k;
+        
+        vector<int> freq(k,0);
+        freq[0]=1;
+        long long prefix=0;
+        long long ans=0;
+        for(int i=0;i<n;i++){
+            int x;
+            cin>>x;
+            
+            prefix += x;
+            int rem = prefix % k;
+            ans += freq[rem];
+            freq[rem]++;
+            
+        }
+        cout<<ans<<"\n";
+    }  
+    return 0;
+}
